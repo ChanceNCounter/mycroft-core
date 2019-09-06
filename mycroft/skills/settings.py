@@ -373,6 +373,12 @@ class Settings:
         self._skill = skill
         self._settings = get_local_settings(skill.root_dir, skill.name)
 
+    def __getattr__(self, attr):
+        if attr not in ['store', 'set_changed_callback']:
+            return getattr(self._settings, attr)
+        else:
+            return super().getattr(attr)
+
     def __setitem__(self, key, val):
         self._settings[key] = val
 
