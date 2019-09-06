@@ -358,7 +358,7 @@ class DeviceApi(Api):
             "path": "/" + self.identity.uuid + "/token/" + str(dev_cred)
         })
 
-    def get_remote_skill_settings(self):
+    def get_skill_settings(self):
         """Get the remote skill settings for all skills on this device."""
         return self.request({
             "method": "GET",

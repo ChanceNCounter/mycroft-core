@@ -339,7 +339,7 @@ class SkillSettingsDownloader:
             skill_settings (dict or None): returns a dict if matches
         """
         try:
-            remote_settings = self.api.get_remote_skill_settings()
+            remote_settings = self.api.get_skill_settings()
         except Exception:
             LOG.exception('Failed to download remote settings from server.')
             success = False
