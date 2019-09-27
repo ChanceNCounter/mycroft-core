@@ -610,11 +610,9 @@ def nice_duration(time1, time2=None, lang=None, speech=True, use_years=True,
         if hours > 0 and resolution.value > TimeResolution.DAYS.value:
             out += str(hours)
         if minutes > 0 and resolution.value > TimeResolution.HOURS.value:
-            out += ":" + ("0" + str(minutes)) if minutes < 10 else str(minutes)
-        if seconds < 10 and resolution.value > TimeResolution.MINUTES.value:
-            out += "0"
+            out += ":" + (("0" + str(minutes)) if minutes < 10 else str(minutes))
         if seconds > 0 and resolution.value > TimeResolution.MINUTES.value:
-            out += str(seconds)
+            out += ":" + (("0" + str(seconds)) if seconds < 10 else str(seconds))
         if milliseconds > 0 and resolution.value \
                 == TimeResolution.MILLISECONDS.value:
             out += "." + str(milliseconds).split(".")[1]
