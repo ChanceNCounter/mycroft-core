@@ -467,7 +467,7 @@ def nice_year(dt, lang=None, bc=False):
     return date_time_format.year_format(dt, full_code, bc)
 
 
-def nice_duration(time1, time2=None, lang=None, speech=True, use_years=True,
+def nice_duration(time1, lang=None, speech=True, *, time2=None, use_years=True,
                   resolution=TimeResolution.SECONDS):
     """ Convert duration in seconds to a nice spoken timespan
 

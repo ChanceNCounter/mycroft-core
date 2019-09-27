@@ -440,11 +440,11 @@ class TestNiceDateFormat(unittest.TestCase):
                                        speech=False),
                          "5d 18:53:20")
         self.assertEqual(nice_duration(datetime.datetime(2019, 12, 25, 20, 30),
-                                       datetime.datetime(2019, 10, 31, 8, 00),
+                                       time2=datetime.datetime(2019, 10, 31, 8, 00),  # nopep8
                                        speech=False), "55d 12:30")
         self.assertEqual(nice_duration(
             datetime.datetime(2019, 1, 1),
-            datetime.datetime(2018, 1, 1),
+            time2=datetime.datetime(2018, 1, 1),
             use_years=False), "three hundred and sixty five days")
 
     def test_join(self):
