@@ -521,11 +521,13 @@ def nice_duration(time1, time2=None, lang=None, speech=True, use_years=True,
             duration = time1 - time2
             _leapdays = (abs(leapdays(time1.year, time2.year)))
 
-            if time1.second == 0 or time2.second == 0 and resolution.value >= 5:
+            if (time1.second == 0 and time2.second == 0 and
+                    resolution.value >= 5):
                 resolution = TimeResolution.MINUTES
-            if time1.minute == 0 or time2.minute == 0 and resolution.value == 4:
+            if (time1.minute == 0 and time2.minute == 0 and
+                    resolution.value == 4):
                 resolution = TimeResolution.HOURS
-            if time1.hour == 0 or time2.hour == 0 and TimeResolution.value == 3:
+            if time1.hour == 0 and time2.hour == 0 and resolution.value == 3:
                 resolution = TimeResolution.DAYS
 
         else:
@@ -570,25 +572,31 @@ def nice_duration(time1, time2=None, lang=None, speech=True, use_years=True,
         if years > 0:
             out += pronounce_number(years, lang) + " "
             out += _translate_word("year" if years == 1 else "years", lang)
+
         if days > 0 and resolution.value > TimeResolution.YEARS.value:
             if out:
                 out += " "
             out += pronounce_number(days, lang) + " "
             out += _translate_word("day" if days == 1 else "days", lang)
+
         if hours > 0 and resolution.value > TimeResolution.DAYS.value:
             if out:
                 out += " "
             out += pronounce_number(hours, lang) + " "
             out += _translate_word("hour" if hours == 1 else "hours", lang)
+
         if minutes > 0 and resolution.value > TimeResolution.HOURS.value:
             if out:
                 out += " "
             out += pronounce_number(minutes, lang) + " "
             out += _translate_word("minute" if minutes ==
                                    1 else "minutes", lang)
-        if (seconds > 0 and resolution.value >= TimeResolution.SECONDS.value) or \
-             (milliseconds > 0 and resolution.value ==
-                            TimeResolution.MILLISECONDS.value):
+
+        if ((seconds > 0 and resolution.value >=
+             TimeResolution.SECONDS.value) or
+            (milliseconds > 0 and resolution.value ==
+             TimeResolution.MILLISECONDS.value)):
+
             if resolution.value == TimeResolution.MILLISECONDS.value:
                 seconds += milliseconds
             if out:
@@ -610,9 +618,11 @@ def nice_duration(time1, time2=None, lang=None, speech=True, use_years=True,
         if hours > 0 and resolution.value > TimeResolution.DAYS.value:
             out += str(hours)
         if minutes > 0 and resolution.value > TimeResolution.HOURS.value:
-            out += ":" + (("0" + str(minutes)) if minutes < 10 else str(minutes))
+            out += ":" + (("0" + str(minutes)) if minutes <
+                          10 else str(minutes))
         if seconds > 0 and resolution.value > TimeResolution.MINUTES.value:
-            out += ":" + (("0" + str(seconds)) if seconds < 10 else str(seconds))
+            out += ":" + (("0" + str(seconds)) if seconds <
+                          10 else str(seconds))
         if milliseconds > 0 and resolution.value \
                 == TimeResolution.MILLISECONDS.value:
             out += "." + str(milliseconds).split(".")[1]
