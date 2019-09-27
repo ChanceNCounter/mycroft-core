@@ -468,8 +468,8 @@ def nice_year(dt, lang=None, bc=False):
     return date_time_format.year_format(dt, full_code, bc)
 
 
-def duration_handler(time1, lang=None, speech=True, *, time2=None,
-                     use_years=True, resolution=TimeResolution.SECONDS):
+def _duration_handler(time1, lang=None, speech=True, *, time2=None,
+                      use_years=True, resolution=TimeResolution.SECONDS):
     """ Convert duration in seconds to a nice spoken timespan
         Used as a handler by nice_duration and nice_duration_dt
 
@@ -673,8 +673,8 @@ def nice_duration(duration, lang=None, speech=True, use_years=True,
     Returns:
         str: timespan as a string
     """
-    return duration_handler(duration, lang=lang, speech=speech,
-                            use_years=use_years, resolution=resolution)
+    return _duration_handler(duration, lang=lang, speech=speech,
+                             use_years=use_years, resolution=resolution)
 
 
 def nice_duration_dt(date1, date2, lang=None, speech=True, use_years=True,
@@ -714,8 +714,8 @@ def nice_duration_dt(date1, date2, lang=None, speech=True, use_years=True,
     """
     big = max(date1, date2)
     small = min(date1, date2)
-    return duration_handler(big, lang=lang, speech=speech, time2=small,
-                            use_years=use_years, resolution=resolution)
+    return _duration_handler(big, lang=lang, speech=speech, time2=small,
+                             use_years=use_years, resolution=resolution)
 
 
 def join_list(items, connector, sep=None, lang=None):
