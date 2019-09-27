@@ -20,12 +20,14 @@ import datetime
 import ast
 from pathlib import Path
 
+from mycroft.util.format import TimeResolution
 from mycroft.util.format import nice_number
 from mycroft.util.format import nice_time
 from mycroft.util.format import nice_date
 from mycroft.util.format import nice_date_time
 from mycroft.util.format import nice_year
 from mycroft.util.format import nice_duration
+from mycroft.util.format import nice_duration_dt
 from mycroft.util.format import pronounce_number
 from mycroft.util.format import date_time_format
 from mycroft.util.format import join_list
@@ -432,19 +434,33 @@ class TestNiceDateFormat(unittest.TestCase):
         self.assertEqual(nice_duration(5000, speech=False), "1:23:20")
         self.assertEqual(nice_duration(50000),
                          "thirteen hours fifty three minutes and twenty seconds")  # nopep8
+        self.assertEqual(nice_duration(50000,
+                                       resolution=TimeResolution.MINUTES),
+                         "thirteen hours fifty three minutes")
+        self.assertEqual(nice_duration(50000, resolution=TimeResolution.HOURS),
+                         "thirteen hours")
         self.assertEqual(nice_duration(50000, speech=False), "13:53:20")
         self.assertEqual(nice_duration(500000),
                          "five days eighteen hours fifty three minutes and twenty seconds")  # nopep8
         self.assertEqual(nice_duration(500000, speech=False), "5d 18:53:20")
+        self.assertEqual(nice_duration(1.250575,
+                                       resolution=TimeResolution.MILLISECONDS),
+                         "one point two five seconds")
         self.assertEqual(nice_duration(datetime.timedelta(seconds=500000),
                                        speech=False),
                          "5d 18:53:20")
-        self.assertEqual(nice_duration(datetime.datetime(2019, 12, 25, 20, 30),
-                                       time2=datetime.datetime(2019, 10, 31, 8, 00),  # nopep8
-                                       speech=False), "55d 12:30")
-        self.assertEqual(nice_duration(
+
+    def test_nice_duration_dt(self):
+        self.assertEqual(
+            nice_duration_dt(datetime.datetime(2019, 12, 25, 20, 30),
+                                    date2=datetime.datetime(2019, 10, 31, 8, 00),  # nopep8
+                                    speech=False), "55d 12:30")
+        self.assertEqual(nice_duration_dt(
             datetime.datetime(2019, 1, 1),
-            time2=datetime.datetime(2018, 1, 1),
+            date2=datetime.datetime(2018, 1, 1), speech=False), "1y")
+        self.assertEqual(nice_duration_dt(
+            datetime.datetime(2019, 1, 1),
+            date2=datetime.datetime(2018, 1, 1),
             use_years=False), "three hundred and sixty five days")
 
     def test_join(self):

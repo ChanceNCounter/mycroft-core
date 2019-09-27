@@ -29,6 +29,7 @@ import warnings
 from collections import namedtuple
 from calendar import leapdays
 from enum import Enum
+from math import modf
 
 from mycroft.util.lang import get_full_lang_code, get_primary_lang_code
 
@@ -467,9 +468,10 @@ def nice_year(dt, lang=None, bc=False):
     return date_time_format.year_format(dt, full_code, bc)
 
 
-def nice_duration(time1, lang=None, speech=True, *, time2=None, use_years=True,
-                  resolution=TimeResolution.SECONDS):
+def duration_handler(time1, lang=None, speech=True, *, time2=None,
+                     use_years=True, resolution=TimeResolution.SECONDS):
     """ Convert duration in seconds to a nice spoken timespan
+        Used as a handler by nice_duration and nice_duration_dt
 
     Accepts:
         datetime.timedelta, or
@@ -532,7 +534,8 @@ def nice_duration(time1, lang=None, speech=True, *, time2=None, use_years=True,
 
         else:
             _tmp = warnings.formatwarning
-            warnings.formatwarning = lambda msg, *args, **kwargs: f'{msg}\n'
+            warnings.formatwarning = lambda msg, * \
+                args, **kwargs: "{}\n".format(msg)
             warning = ("WARN: mycroft.util.format.nice_duration() can't "
                        "subtract " + str(type1) + ". Ignoring 2nd "
                        "argument '" + str(time2) + "'.")
@@ -542,15 +545,13 @@ def nice_duration(time1, lang=None, speech=True, *, time2=None, use_years=True,
     else:
         duration = time1
 
-        from math import modf
-
     # Pull decimal portion of seconds, if present, to use for milliseconds
-    if type(duration) is float:
+    if isinstance(duration, float):
         _seconds_decimal = modf(duration)
         _seconds_decimal = _seconds_decimal[0]
         milliseconds = round(_seconds_decimal, 2)
 
-    if type(duration) is not datetime.timedelta:
+    if not isinstance(duration, datetime.timedelta):
         duration = datetime.timedelta(seconds=duration)
 
     days = duration.days
@@ -634,8 +635,87 @@ def nice_duration(time1, lang=None, speech=True, *, time2=None, use_years=True,
 
         if resolution.value >= TimeResolution.HOURS.value and ":" not in out:
             out += "h"
+        if out[-1] == " ":
+            out = out[:-1]
 
     return out
+
+
+def nice_duration(duration, lang=None, speech=True, use_years=True,
+                  resolution=TimeResolution.SECONDS):
+    """ Convert duration in seconds to a nice spoken timespan
+
+    Accepts:
+        time, in seconds, or datetime.timedelta
+
+    Examples:
+       duration = 60  ->  "1:00" or "one minute"
+       duration = 163  ->  "2:43" or "two minutes forty three seconds"
+       duration = timedelta(seconds=120)  ->  "2:00" or "two minutes"
+
+    Args:
+        duration (int/float/datetime.timedelta)
+        lang (str, optional): a BCP-47 language code, None for default
+        speech (bool): format output for speech (True) or display (False)
+        use_years (bool): return years and days if True, total days if False
+        resolution (mycroft.util.format.TimeResolution, optional): lower bound
+
+            mycroft.util.format.TimeResolution values:
+                TimeResolution.YEARS
+                TimeResolution.DAYS
+                TimeResolution.HOURS
+                TimeResolution.MINUTES
+                TimeResolution.SECONDS
+                TimeResolution.MILLISECONDS
+            NOTE: nice_duration will not produce milliseconds
+            unless that resolution is passed.
+
+    Returns:
+        str: timespan as a string
+    """
+    return duration_handler(duration, lang=lang, speech=speech,
+                            use_years=use_years, resolution=resolution)
+
+
+def nice_duration_dt(date1, date2, lang=None, speech=True, use_years=True,
+                     resolution=TimeResolution.SECONDS):
+    """ Convert duration between datetimes to a nice spoken timespan
+
+    Accepts:
+        2 x datetime.datetime
+
+    Examples:
+        date1 = datetime(2019, 3, 12),
+        date2 = datetime(2019, 1, 1)  ->  "seventy days"
+
+        date1 = datetime(2019, 12, 25, 20, 30),
+        date2 = datetime(2019, 10, 31, 8, 00),
+        speech = False  ->  "55d 12:30"
+
+    Args:
+        date1, date2 (datetime.datetime)
+        lang (str, optional): a BCP-47 language code, None for default
+        speech (bool): format output for speech (True) or display (False)
+        use_years (bool): return years and days if True, total days if False
+        resolution (mycroft.util.format.TimeResolution, optional): lower bound
+
+            mycroft.util.format.TimeResolution values:
+                TimeResolution.YEARS
+                TimeResolution.DAYS
+                TimeResolution.HOURS
+                TimeResolution.MINUTES
+                TimeResolution.SECONDS
+
+            NOTE: nice_duration_dt() cannot do TimeResolution.MILLISECONDS
+            This will silently fall back on TimeResolution.SECONDS
+
+    Returns:
+        str: timespan as a string
+    """
+    big = max(date1, date2)
+    small = min(date1, date2)
+    return duration_handler(big, lang=lang, speech=speech, time2=small,
+                            use_years=use_years, resolution=resolution)
 
 
 def join_list(items, connector, sep=None, lang=None):
