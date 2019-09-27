@@ -481,8 +481,8 @@ def nice_duration(time1, time2=None, lang=None, speech=True, use_years=True,
        time1 = 163  ->  "2:43" or "two minutes forty three seconds"
        time1 = timedelta(seconds=120)  ->  "2:00" or "two minutes"
 
-       time1 = datetime(2019, 03, 12),
-       time2 = datetime(2019, 01, 01)  ->  "seventy days"
+       time1 = datetime(2019, 3, 12),
+       time2 = datetime(2019, 1, 1)  ->  "seventy days"
 
     Args:
         time1: int/float seconds, OR datetime.timedelta, OR datetime.datetime
