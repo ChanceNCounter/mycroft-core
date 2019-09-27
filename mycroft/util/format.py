@@ -488,10 +488,10 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
 
     Args:
         time1: int/float seconds, OR datetime.timedelta, OR datetime.datetime
-        time2 (datetime, optional): subtracted from time1, if time1 is datetime
+        time2 (datetime, optional): subtracted from time1 if time1 is datetime
         lang (str, optional): a BCP-47 language code, None for default
-        speech (bool): format output for speech (True) or display (False)
-        use_years (bool): return years and days if True, total days if False
+        speech (bool, opt): format output for speech (True) or display (False)
+        use_years (bool, opt): rtn years and days if True, total days if False
         resolution (mycroft.util.format.TimeResolution, optional): lower bound
 
             mycroft.util.format.TimeResolution values:
@@ -656,8 +656,8 @@ def nice_duration(duration, lang=None, speech=True, use_years=True,
     Args:
         duration (int/float/datetime.timedelta)
         lang (str, optional): a BCP-47 language code, None for default
-        speech (bool): format output for speech (True) or display (False)
-        use_years (bool): return years and days if True, total days if False
+        speech (bool, opt): format output for speech (True) or display (False)
+        use_years (bool, opt): rtn years and days if True, total days if False
         resolution (mycroft.util.format.TimeResolution, optional): lower bound
 
             mycroft.util.format.TimeResolution values:
@@ -695,8 +695,8 @@ def nice_duration_dt(date1, date2, lang=None, speech=True, use_years=True,
     Args:
         date1, date2 (datetime.datetime)
         lang (str, optional): a BCP-47 language code, None for default
-        speech (bool): format output for speech (True) or display (False)
-        use_years (bool): return years and days if True, total days if False
+        speech (bool, opt): format output for speech (True) or display (False)
+        use_years (bool, opt): rtn years and days if True, total days if False
         resolution (mycroft.util.format.TimeResolution, optional): lower bound
 
             mycroft.util.format.TimeResolution values:
