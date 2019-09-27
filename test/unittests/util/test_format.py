@@ -428,17 +428,24 @@ class TestNiceDateFormat(unittest.TestCase):
         self.assertEqual(nice_duration(61), "one minute one second")
         self.assertEqual(nice_duration(61, speech=False), "1:01")
         self.assertEqual(nice_duration(5000),
-                         "one hour twenty three minutes twenty seconds")
+                         "one hour twenty three minutes and twenty seconds")
         self.assertEqual(nice_duration(5000, speech=False), "1:23:20")
         self.assertEqual(nice_duration(50000),
-                         "thirteen hours fifty three minutes twenty seconds")
+                         "thirteen hours fifty three minutes and twenty seconds")  # nopep8
         self.assertEqual(nice_duration(50000, speech=False), "13:53:20")
         self.assertEqual(nice_duration(500000),
-                         "five days  eighteen hours fifty three minutes twenty seconds")  # nopep8
+                         "five days eighteen hours fifty three minutes and twenty seconds")  # nopep8
         self.assertEqual(nice_duration(500000, speech=False), "5d 18:53:20")
         self.assertEqual(nice_duration(datetime.timedelta(seconds=500000),
                                        speech=False),
                          "5d 18:53:20")
+        self.assertEqual(nice_duration(datetime.datetime(2019, 12, 25, 20, 30),
+                                       datetime.datetime(2019, 10, 31, 8, 00),
+                                       speech=False), "55d 12:30")
+        self.assertEqual(nice_duration(
+            datetime.datetime(2019, 1, 1),
+            datetime.datetime(2018, 1, 1),
+            use_years=False), "three hundred and sixty five days")
 
     def test_join(self):
         self.assertEqual(join_list(None, "and"), "")
