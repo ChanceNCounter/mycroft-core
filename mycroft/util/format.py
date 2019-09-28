@@ -536,7 +536,7 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             _tmp = warnings.formatwarning
             warnings.formatwarning = lambda msg, * \
                 args, **kwargs: "{}\n".format(msg)
-            warning = ("WARN: mycroft.util.format.nice_duration() can't "
+            warning = ("WARN: mycroft.util.format.nice_duration_dt() can't "
                        "subtract " + str(type1) + ". Ignoring 2nd "
                        "argument '" + str(time2) + "'.")
             warnings.warn(warning)
@@ -603,14 +603,17 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             if out:
                 out += " "
                 if len(out.split()) > 3 or seconds < 1:
-                    out += "and "
-                if seconds < 1:
-                    out += "zero"
+                    out += _translate_word("and", lang) + " "
+            if seconds < 1:
+                out += pronounce_number(0, lang)
             out += pronounce_number(seconds, lang) + " "
             out += _translate_word("second" if seconds ==
                                    1 else "seconds", lang)
     else:
         # M:SS, MM:SS, H:MM:SS, Dd H:MM:SS format
+
+        _seconds_str = ("0" + str(seconds)) if seconds < 10 else str(seconds)
+
         out = ""
         if years > 0:
             out = str(years) + "y "
@@ -618,25 +621,32 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             out += str(days) + "d "
         if hours > 0 and resolution.value > TimeResolution.DAYS.value:
             out += str(hours)
-        if minutes > 0 and resolution.value > TimeResolution.HOURS.value:
+
+        if minutes > 0 and resolution.value >= TimeResolution.HOURS.value:
             if hours != 0:
                 out += ":"
                 if minutes < 10:
                     out += "0"
-            out += str(minutes)
-        if seconds > 0 and resolution.value > TimeResolution.MINUTES.value:
-            if minutes == 0:
-                out += "0"
-            out += ":" + (("0" + str(seconds)) if seconds <
-                          10 else str(seconds))
+            out += str(minutes) + ":"
+            if seconds > 0:
+                out += _seconds_str
+            else:
+                out += "00"
+        elif seconds > 0:
+            if out == str(hours):
+                out += ":"
+            out += ("00:" if hours > 0 else "0:") + _seconds_str
         if milliseconds > 0 and resolution.value \
                 == TimeResolution.MILLISECONDS.value:
             out += "." + str(milliseconds).split(".")[1]
 
-        if resolution.value >= TimeResolution.HOURS.value and ":" not in out:
+        if (resolution.value >= TimeResolution.HOURS.value and hours > 0 and
+                ":" not in out):
             out += "h"
-        if out[-1] == " ":
-            out = out[:-1]
+
+        if out[0] == '.':
+            out = "0:00" + out
+        out = out.strip()
 
     return out
 
@@ -712,8 +722,12 @@ def nice_duration_dt(date1, date2, lang=None, speech=True, use_years=True,
     Returns:
         str: timespan as a string
     """
-    big = max(date1, date2)
-    small = min(date1, date2)
+    try:
+        big = max(date1, date2)
+        small = min(date1, date2)
+    except(TypeError):
+        big = date1
+        small = date2
     return _duration_handler(big, lang=lang, speech=speech, time2=small,
                              use_years=use_years, resolution=resolution)
 
