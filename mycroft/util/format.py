@@ -547,9 +547,12 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
 
     # Pull decimal portion of seconds, if present, to use for milliseconds
     if isinstance(duration, float):
-        _seconds_decimal = modf(duration)
-        _seconds_decimal = _seconds_decimal[0]
-        milliseconds = round(_seconds_decimal, 2)
+        milliseconds = str(duration).split('.')[1]
+        if speech:
+            milliseconds = milliseconds[:2]
+        else:
+            milliseconds = milliseconds[:3]
+        milliseconds = float("0." + milliseconds)
 
     if not isinstance(duration, datetime.timedelta):
         duration = datetime.timedelta(seconds=duration)
@@ -636,13 +639,20 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             if out == str(hours):
                 out += ":"
             out += ("00:" if hours > 0 else "0:") + _seconds_str
-        if milliseconds > 0 and resolution.value \
-                == TimeResolution.MILLISECONDS.value:
-            out += "." + str(milliseconds).split(".")[1]
 
         if (resolution.value >= TimeResolution.HOURS.value and hours > 0 and
                 ":" not in out):
             out += "h"
+
+        if milliseconds > 0 and resolution.value \
+                == TimeResolution.MILLISECONDS.value:
+            _mill = str(milliseconds).split(".")[1]
+            while len(_mill) < 3:
+                _mill += "0"
+            if out == "":
+                out = "0:00"
+            if ":" in out:
+                out += "." + _mill
 
         if out[0] == '.':
             out = "0:00" + out

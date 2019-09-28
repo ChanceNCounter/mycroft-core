@@ -460,7 +460,17 @@ class TestNiceDateFormat(unittest.TestCase):
                          "zero point two five seconds")
         self.assertEqual(
             nice_duration(0.25, speech=False,
-                          resolution=TimeResolution.MILLISECONDS), "0:00.25")
+                          resolution=TimeResolution.MILLISECONDS), "0:00.250")
+        self.assertEqual(
+            nice_duration(0.2, speech=False,
+                          resolution=TimeResolution.MILLISECONDS), "0:00.200")
+
+        self.assertEqual(nice_duration(360000.254,
+                                       resolution=TimeResolution.MILLISECONDS,
+                                       speech=False), "4d 4h")
+        self.assertEqual(nice_duration(360365.254,
+                                       resolution=TimeResolution.MILLISECONDS,
+                                       speech=False), "4d 4:06:05.254")
 
     def test_nice_duration_dt(self):
 
