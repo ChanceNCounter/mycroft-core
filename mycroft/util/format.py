@@ -523,6 +523,8 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             duration = time1 - time2
             _leapdays = (abs(leapdays(time1.year, time2.year)))
 
+            # when operating on datetimes, refuse resolutions that
+            # would result in bunches of trailing zeroes
             if (time1.second == 0 and time2.second == 0 and
                     resolution.value >= 5):
                 resolution = TimeResolution.MINUTES
@@ -554,6 +556,7 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             milliseconds = milliseconds[:3]
         milliseconds = float("0." + milliseconds)
 
+    # Cast duration to datetime.timedelta for human-friendliness
     if not isinstance(duration, datetime.timedelta):
         duration = datetime.timedelta(seconds=duration)
 
@@ -565,6 +568,7 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
         years = 0
     days = days % 365 if years > 0 else days
 
+    # We already stored milliseconds. Now we want the integer part.
     seconds = int(duration.seconds)
     minutes = seconds // 60
     seconds %= 60
@@ -605,8 +609,10 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
                 seconds += milliseconds
             if out:
                 out += " "
+                # Throw "and" between minutes and seconds if duration < 1 hour
                 if len(out.split()) > 3 or seconds < 1:
                     out += _translate_word("and", lang) + " "
+            # speaking "zero point five seconds" is better than "point five"
             if seconds < 1:
                 out += pronounce_number(0, lang)
             out += pronounce_number(seconds, lang) + " "
@@ -640,22 +646,26 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
                 out += ":"
             out += ("00:" if hours > 0 else "0:") + _seconds_str
 
+        # If this evaluates True, out currently ends in hours: "1d 12"
         if (resolution.value >= TimeResolution.HOURS.value and hours > 0 and
                 ":" not in out):
+            # to "1d 12h"
             out += "h"
 
         if milliseconds > 0 and resolution.value \
                 == TimeResolution.MILLISECONDS.value:
             _mill = str(milliseconds).split(".")[1]
+            # right-pad milliseconds to three decimal places
             while len(_mill) < 3:
                 _mill += "0"
+            # make sure output < 1s still formats correctly
             if out == "":
                 out = "0:00"
+            # only append milliseconds to output that contains
+            # minutes and/or seconds
             if ":" in out:
                 out += "." + _mill
 
-        if out[0] == '.':
-            out = "0:00" + out
         out = out.strip()
 
     return out
