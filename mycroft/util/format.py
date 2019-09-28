@@ -525,13 +525,14 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
 
             # when operating on datetimes, refuse resolutions that
             # would result in bunches of trailing zeroes
-            if (time1.second == 0 and time2.second == 0 and
-                    resolution.value >= 5):
+            if all([time1.second == 0, time2.second == 0,
+                    resolution.value >= 5]):
                 resolution = TimeResolution.MINUTES
-            if (time1.minute == 0 and time2.minute == 0 and
-                    resolution.value == 4):
+            if all([time1.minute == 0, time2.minute == 0,
+                    resolution.value == 4]):
                 resolution = TimeResolution.HOURS
-            if time1.hour == 0 and time2.hour == 0 and resolution.value == 3:
+            if all([time1.hour == 0, time2.hour == 0,
+                    resolution.value == 3]):
                 resolution = TimeResolution.DAYS
 
         else:
@@ -569,7 +570,7 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
     days = days % 365 if years > 0 else days
 
     # We already stored milliseconds. Now we want the integer part.
-    seconds = int(duration.seconds)
+    seconds = duration.seconds
     minutes = seconds // 60
     seconds %= 60
     hours = minutes // 60
@@ -647,8 +648,8 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             out += ("00:" if hours > 0 else "0:") + _seconds_str
 
         # If this evaluates True, out currently ends in hours: "1d 12"
-        if (resolution.value >= TimeResolution.HOURS.value and hours > 0 and
-                ":" not in out):
+        if all([resolution.value >= TimeResolution.HOURS.value, hours > 0,
+                ":" not in out]):
             # to "1d 12h"
             out += "h"
 
