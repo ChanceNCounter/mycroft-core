@@ -505,7 +505,7 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             unless that resolution is passed.
 
     Returns:
-        str: timespan as a string
+        str: timespan as a string (NOTE: returns empty string if duration)
     """
     _leapdays = 0
     milliseconds = 0
@@ -619,6 +619,7 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             out += pronounce_number(seconds, lang) + " "
             out += _translate_word("second" if seconds ==
                                    1 else "seconds", lang)
+
     else:
         # M:SS, MM:SS, H:MM:SS, Dd H:MM:SS format
 
@@ -642,16 +643,14 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
                 out += _seconds_str
             else:
                 out += "00"
-        elif seconds > 0:
-            if out == str(hours):
-                out += ":"
+        elif seconds > 0:           # if we have seconds but no minutes...
+            # check if output ends in hours
+            try:
+                if str(hours) == out.split()[-1]:
+                    out += ":"
+            except IndexError:
+                pass
             out += ("00:" if hours > 0 else "0:") + _seconds_str
-
-        # If this evaluates True, out currently ends in hours: "1d 12"
-        if all([resolution.value >= TimeResolution.HOURS.value, hours > 0,
-                ":" not in out]):
-            # to "1d 12h"
-            out += "h"
 
         if milliseconds > 0 and resolution.value \
                 == TimeResolution.MILLISECONDS.value:
@@ -662,11 +661,19 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             # make sure output < 1s still formats correctly
             if out == "":
                 out = "0:00"
+            else:
+                if (str(hours) == out.split()[-1]) and ":" not in out:
+                    out += ":00:00"
             # only append milliseconds to output that contains
             # minutes and/or seconds
             if ":" in out:
                 out += "." + _mill
 
+        # If this evaluates True, out currently ends in hours: "1d 12"
+        if all([resolution.value >= TimeResolution.HOURS.value, ":" not in out,
+                hours > 0]):
+            # to "1d 12h"
+            out += "h"
         out = out.strip()
 
     return out
@@ -702,7 +709,7 @@ def nice_duration(duration, lang=None, speech=True, use_years=True,
             unless that resolution is passed.
 
     Returns:
-        str: timespan as a string
+        str: timespan as a string (NOTE: returns empty string if duration)
     """
     return _duration_handler(duration, lang=lang, speech=speech,
                              use_years=use_years, resolution=resolution)
@@ -741,7 +748,7 @@ def nice_duration_dt(date1, date2, lang=None, speech=True, use_years=True,
             This will silently fall back on TimeResolution.SECONDS
 
     Returns:
-        str: timespan as a string
+        str: timespan as a string (NOTE: returns empty string if duration)
     """
     try:
         big = max(date1, date2)
