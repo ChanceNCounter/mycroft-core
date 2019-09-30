@@ -29,7 +29,6 @@ import warnings
 from collections import namedtuple
 from calendar import leapdays
 from enum import Enum
-from math import modf
 
 from mycroft.util.lang import get_full_lang_code, get_primary_lang_code
 
