@@ -505,7 +505,7 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
             unless that resolution is passed.
 
     Returns:
-        str: timespan as a string (NOTE: returns empty string if duration)
+        str: timespan as a string (NOTE: returns empty string if duration == 0)
     """
     _leapdays = 0
     milliseconds = 0
@@ -709,7 +709,7 @@ def nice_duration(duration, lang=None, speech=True, use_years=True,
             unless that resolution is passed.
 
     Returns:
-        str: timespan as a string (NOTE: returns empty string if duration)
+        str: timespan as a string (NOTE: returns empty string if duration == 0)
     """
     return _duration_handler(duration, lang=lang, speech=speech,
                              use_years=use_years, resolution=resolution)
@@ -748,7 +748,7 @@ def nice_duration_dt(date1, date2, lang=None, speech=True, use_years=True,
             This will silently fall back on TimeResolution.SECONDS
 
     Returns:
-        str: timespan as a string (NOTE: returns empty string if duration)
+        str: timespan as a string (NOTE: returns empty string if duration == 0)
     """
     try:
         big = max(date1, date2)
