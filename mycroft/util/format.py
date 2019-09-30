@@ -508,6 +508,7 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
         str: timespan as a string
     """
     _leapdays = 0
+    _input_resolution = resolution
     milliseconds = 0
 
     type1 = type(time1)
@@ -633,17 +634,21 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
         if hours > 0 and resolution.value > TimeResolution.DAYS.value:
             out += str(hours)
 
-        if minutes > 0 and resolution.value >= TimeResolution.HOURS.value:
+        if resolution.value == TimeResolution.MINUTES.value:
+            out += (("h " + str(minutes) + "m") if hours > 0
+                    else str(minutes) + "m")
+        elif minutes > 0 and resolution.value > TimeResolution.HOURS.value:
             if hours != 0:
                 out += ":"
                 if minutes < 10:
                     out += "0"
             out += str(minutes) + ":"
-            if seconds > 0:
+            if seconds > 0 and resolution.value > TimeResolution.MINUTES.value:
                 out += _seconds_str
             else:
                 out += "00"
-        elif seconds > 0:           # if we have seconds but no minutes...
+        # if we have seconds but no minutes...
+        elif seconds > 0 and resolution.value > TimeResolution.MINUTES.value:
             # check if output ends in hours
             try:
                 if str(hours) == out.split()[-1]:
@@ -670,14 +675,26 @@ def _duration_handler(time1, lang=None, speech=True, *, time2=None,
                 out += "." + _mill
 
         # If this evaluates True, out currently ends in hours: "1d 12"
-        if all([resolution.value >= TimeResolution.HOURS.value, ":" not in out,
-                hours > 0]):
+        if out and all([resolution.value >= TimeResolution.HOURS.value,
+                        ":" not in out, out[-1] != "m", hours > 0]):
             # to "1d 12h"
             out += "h"
         out = out.strip()
 
     if not out:
-        out = "zero seconds" if speech else "0:00"
+        if _input_resolution == TimeResolution.YEARS:
+            out = "zero years" if speech else "0y"
+        elif _input_resolution == TimeResolution.DAYS:
+            out = "zero days" if speech else "0d"
+        elif _input_resolution == TimeResolution.HOURS:
+            out = "zero hours" if speech else "0h"
+        elif _input_resolution == TimeResolution.MINUTES:
+            if speech:
+                out = "under a minute" if seconds > 0 else "zero minutes"
+            else:
+                out = "0m"
+        else:
+            out = "zero seconds" if speech else "0:00"
 
     return out
 

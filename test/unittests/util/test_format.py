@@ -445,6 +445,8 @@ class TestNiceDurationFuncs(unittest.TestCase):
         self.assertEqual(nice_duration(1), "one second")
         self.assertEqual(nice_duration(3), "three seconds")
         self.assertEqual(nice_duration(1, speech=False), "0:01")
+        self.assertEqual(nice_duration(1, resolution=TimeResolution.MINUTES),
+                         "under a minute")
         self.assertEqual(nice_duration(61), "one minute one second")
         self.assertEqual(nice_duration(61, speech=False), "1:01")
         self.assertEqual(nice_duration(3600), "one hour")
@@ -494,6 +496,11 @@ class TestNiceDurationFuncs(unittest.TestCase):
 
         self.assertEqual(nice_duration(0), "zero seconds")
         self.assertEqual(nice_duration(0, speech=False), "0:00")
+        self.assertEqual(nice_duration(0, resolution=TimeResolution.MINUTES),
+                         "zero minutes")
+        self.assertEqual(nice_duration(30,
+                                       resolution=TimeResolution.MINUTES),
+                         "under a minute")
 
     def test_nice_duration_dt(self):
 
@@ -506,7 +513,7 @@ class TestNiceDurationFuncs(unittest.TestCase):
         self.assertEqual(
             nice_duration_dt(datetime.datetime(2019, 12, 25, 20, 30),
                                     date2=datetime.datetime(2019, 10, 31, 8, 00),  # nopep8
-                                    speech=False), "55d 12:30:00")
+                                    speech=False), "55d 12h 30m")
         self.assertEqual(nice_duration_dt(
             datetime.datetime(2019, 1, 1),
             date2=datetime.datetime(2018, 1, 1)), "one year")
@@ -529,6 +536,39 @@ class TestNiceDurationFuncs(unittest.TestCase):
         self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
                                           datetime.datetime(1, 1, 1),
                                           speech=False), "0:00")
+
+        self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
+                                          datetime.datetime(1, 1, 1),
+                                          resolution=TimeResolution.MINUTES),
+                         "zero minutes")
+        self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
+                                          datetime.datetime(1, 1, 1),
+                                          resolution=TimeResolution.MINUTES,
+                                          speech=False), "0m")
+        self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
+                                          datetime.datetime(1, 1, 1),
+                                          resolution=TimeResolution.HOURS),
+                         "zero hours")
+        self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
+                                          datetime.datetime(1, 1, 1),
+                                          resolution=TimeResolution.HOURS,
+                                          speech=False), "0h")
+        self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
+                                          datetime.datetime(1, 1, 1),
+                                          resolution=TimeResolution.DAYS),
+                         "zero days")
+        self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
+                                          datetime.datetime(1, 1, 1),
+                                          resolution=TimeResolution.DAYS,
+                                          speech=False), "0d")
+        self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
+                                          datetime.datetime(1, 1, 1),
+                                          resolution=TimeResolution.YEARS),
+                         "zero years")
+        self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
+                                          datetime.datetime(1, 1, 1),
+                                          resolution=TimeResolution.YEARS,
+                                          speech=False), "0y")
 
 
 if __name__ == "__main__":
