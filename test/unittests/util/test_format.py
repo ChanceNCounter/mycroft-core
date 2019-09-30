@@ -424,6 +424,23 @@ class TestNiceDateFormat(unittest.TestCase):
 
 #                print(nice_year(dt, lang=lang))
 
+    def test_join(self):
+        self.assertEqual(join_list(None, "and"), "")
+        self.assertEqual(join_list([], "and"), "")
+
+        self.assertEqual(join_list(["a"], "and"), "a")
+        self.assertEqual(join_list(["a", "b"], "and"), "a and b")
+        self.assertEqual(join_list(["a", "b"], "or"), "a or b")
+
+        self.assertEqual(join_list(["a", "b", "c"], "and"), "a, b and c")
+        self.assertEqual(join_list(["a", "b", "c"], "or"), "a, b or c")
+        self.assertEqual(join_list(["a", "b", "c"], "or", ";"), "a; b or c")
+        self.assertEqual(join_list(["a", "b", "c", "d"], "or"), "a, b, c or d")
+
+        self.assertEqual(join_list([1, "b", 3, "d"], "or"), "1, b, 3 or d")
+
+
+class TestNiceDurationFuncs(unittest.TestCase):
     def test_nice_duration(self):
         self.assertEqual(nice_duration(1), "one second")
         self.assertEqual(nice_duration(3), "three seconds")
@@ -475,8 +492,8 @@ class TestNiceDateFormat(unittest.TestCase):
                                        resolution=TimeResolution.MILLISECONDS,
                                        speech=False), "4d 4:06:05.254")
 
-        self.assertEqual(nice_duration(0, speech=False), "")
-        self.assertEqual(nice_duration(0, speech=False), "")
+        self.assertEqual(nice_duration(0), "zero seconds")
+        self.assertEqual(nice_duration(0, speech=False), "0:00")
 
     def test_nice_duration_dt(self):
 
@@ -506,20 +523,12 @@ class TestNiceDateFormat(unittest.TestCase):
             date2=datetime.datetime(2018, 1, 1)),
             "one year one day")
 
-    def test_join(self):
-        self.assertEqual(join_list(None, "and"), "")
-        self.assertEqual(join_list([], "and"), "")
-
-        self.assertEqual(join_list(["a"], "and"), "a")
-        self.assertEqual(join_list(["a", "b"], "and"), "a and b")
-        self.assertEqual(join_list(["a", "b"], "or"), "a or b")
-
-        self.assertEqual(join_list(["a", "b", "c"], "and"), "a, b and c")
-        self.assertEqual(join_list(["a", "b", "c"], "or"), "a, b or c")
-        self.assertEqual(join_list(["a", "b", "c"], "or", ";"), "a; b or c")
-        self.assertEqual(join_list(["a", "b", "c", "d"], "or"), "a, b, c or d")
-
-        self.assertEqual(join_list([1, "b", 3, "d"], "or"), "1, b, 3 or d")
+        self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
+                                          datetime.datetime(1, 1, 1)),
+                         "zero seconds")
+        self.assertEqual(nice_duration_dt(datetime.datetime(1, 1, 1),
+                                          datetime.datetime(1, 1, 1),
+                                          speech=False), "0:00")
 
 
 if __name__ == "__main__":
