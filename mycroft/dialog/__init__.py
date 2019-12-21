@@ -17,7 +17,9 @@ import os
 import re
 from pathlib import Path
 from os.path import join
+from random import choices
 
+from mycroft.configuration import Configuration
 from mycroft.util import resolve_resource_file
 from mycroft.util.format import expand_options
 from mycroft.util.log import LOG
@@ -48,6 +50,21 @@ class MustacheDialogRenderer:
         # be managed to avoid repetition, but .dialog files with only 1 or 2
         # lines will be unaffected. Dialog should never get stuck in a loop.
         self.loop_prevention_offset = 2
+
+        # Get weighted dict of attitudes from mycroft.configuration.
+        # If it's not a dict, it's junk. Usually, if this happens,
+        # Configuration.get() will have returned None. Sanitize it anyway.
+        self.attitudes = Configuration.get().get("attitudes") or None
+        if not isinstance(self.attitudes, dict):
+            self.attitudes = None
+        self.current_mood = None
+        self.roll_mood()
+
+    def roll_mood(self):
+        if not self.attitudes:
+            return
+        self.current_mood = choices(population=list(self.attitudes.keys()),
+                                    weights=self.attitudes.values())[0]
 
     def load_template_file(self, template_name, filename):
         """
@@ -92,12 +109,18 @@ class MustacheDialogRenderer:
             str: the rendered string
         """
         context = context or {}
-        if template_name not in self.templates:
+
+        mood_template_name = '.'.join([template_name,
+                                       self.current_mood])
+        if mood_template_name in self.templates:
+            template_name = mood_template_name
+        elif template_name not in self.templates:
             # When not found, return the name itself as the dialog
             # This allows things like render("record.not.found") to either
             # find a translation file "record.not.found.dialog" or return
             # "record not found" literal.
             return template_name.replace(".", " ")
+        self.roll_mood()
 
         # Get the .dialog file's contents, minus any which have been spoken
         # recently.
@@ -172,7 +195,6 @@ def get(phrase, lang=None, context=None):
     """
 
     if not lang:
-        from mycroft.configuration import Configuration
         lang = Configuration.get().get("lang")
 
     filename = "text/" + lang.lower() + "/" + phrase + ".dialog"
